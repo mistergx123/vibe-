@@ -108,7 +108,7 @@
     try {
       
       const formData = new FormData(this);
-      const response = await fetch('http://localhost:3000/api/triagem', {
+     const response = await fetch('/api/triagem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ regiao, febre, idade, tempo, sintoma })
