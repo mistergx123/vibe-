@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCheck — Triagem Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" type="image/png" href="img/logo.png">
+
+</head>
+<body>
+
+
+<nav class="topbar">
+  <div class="topbar-left">
+    <div class="logo-mark">
+        <img class="img-dentro" src="img/logo.png" alt="">
+        <rect width="36" height="36" rx="10" fill="#1a56db"/>
+        <path d="M18 10v16M10 18h16" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="logo-text">Medi<span>Check</span></span>
+    <div class="topbar-badge">IA Ativa</div>
+  </div>
+  <div class="topbar-right">
+    <!-- PHP: se logado → link dashboard; senão → link login -->
+    <!-- JS injeta dinamicamente com base na sessão -->
+    <a href="dashboard.html" class="btn-ghost" id="topbar-dashboard" style="display:none">← Meu painel</a>
+    <a href="index.html" class="btn-ghost" id="topbar-login" style="display:none">← Entrar / Cadastrar</a>
+    <div class="urgente-flag hidden" id="urgente-flag">
+      <span>🚨</span> Modo Urgente
+    </div>
+    <a href="tel:192" class="samu-tag">🚑 SAMU 192</a>
+  </div>
+</nav>
+
+<!-- Banner urgente — aparece quando ?urgente=1 -->
+<div class="urgente-banner hidden" id="urgente-banner">
+  <div class="urgente-banner-inner">
+    <span>🚨</span>
+    <div>
+      <strong>Você está em modo de atendimento urgente.</strong>
+      Preencha o formulário abaixo e receba orientação imediata. Se a situação for grave, ligue para o <a href="tel:192">SAMU 192</a> agora.
+    </div>
+    <a href="index.html" class="btn-ghost" style="flex-shrink:0;white-space:nowrap;font-size:12px">Fazer login depois</a>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-eyebrow">🩺 Triagem Inteligente com IA</div>
+  <h1>Avalie seus sintomas com <em>precisão</em></h1>
+  <p>Descreva o que está sentindo e nossa IA analisa a urgência do seu caso em segundos.</p>
+  <div class="steps-row">
+    <div class="step-item"><div class="step-num">1</div> Indique a região</div>
+    <span class="step-arrow">→</span>
+    <div class="step-item"><div class="step-num">2</div> Preencha os dados</div>
+    <span class="step-arrow">→</span>
+    <div class="step-item"><div class="step-num">3</div> Receba a análise</div>
+  </div>
+</section>
+
+<!-- Main -->
+<main class="main-wrap">
+
+  <!-- PHP: action="triagem.php" method="POST" -->
+  <form action="triagem.php" method="POST" id="triagem-form">
+    <!-- Campos hidden: preenchidos via JS -->
+    <input type="hidden" name="regiao" id="region-input" value="">
+    <input type="hidden" name="febre" id="febre-input" value="">
+    <!-- PHP: adicionar token CSRF aqui -->
+    <!-- <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>"> -->
+
+    <div class="content-grid">
+
+      <!-- Boneco SVG -->
+      <div>
+        <div class="panel body-panel">
+          <div class="panel-header">
+            <div class="panel-icon">🫀</div>
+            <div>
+              <div class="panel-title">Região afetada</div>
+              <div class="panel-sub">Clique no corpo ou use os chips</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="body-svg-wrap">
+              <div class="body-side-labels">
+                <span class="side-label">ESQ</span>
+                <span class="side-label">DIR</span>
+              </div>
+              <svg class="body-svg" viewBox="0 0 160 340" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="80" cy="22" rx="19" ry="20" class="body-part" data-region="Cabeça" onclick="selectPart(this)"/>
+                <path d="M65 36 Q80 50 95 36 L93 44 Q80 54 67 44 Z" class="body-part" data-region="Cabeça" onclick="selectPart(this)" style="stroke-width:0.8"/>
+                <path d="M72 50 Q80 48 88 50 L87 62 Q80 60 73 62 Z" class="body-part" data-region="Pescoço" onclick="selectPart(this)"/>
+                <path d="M38 65 Q28 62 22 70 L24 78 Q30 71 40 74 Z" class="body-part" data-region="Ombro esquerdo" onclick="selectPart(this)" style="stroke-width:0.8"/>
+                <path d="M122 65 Q132 62 138 70 L136 78 Q130 71 120 74 Z" class="body-part" data-region="Ombro direito" onclick="selectPart(this)" style="stroke-width:0.8"/>
+                <path d="M40 63 Q80 58 120 63 L118 110 Q80 114 42 110 Z" class="body-part" data-region="Tórax / Peito" onclick="selectPart(this)"/>
+                <path d="M42 110 Q80 114 118 110 L116 148 Q80 152 44 148 Z" class="body-part" data-region="Abdômen" onclick="selectPart(this)"/>
+                <path d="M22 70 Q14 74 12 90 L16 108 Q22 104 28 100 L30 80 Z" class="body-part" data-region="Braço esquerdo" onclick="selectPart(this)"/>
+                <ellipse cx="16" cy="112" rx="8" ry="7" class="body-part" data-region="Braço esquerdo" onclick="selectPart(this)" style="stroke-width:0.8;opacity:0.7"/>
+                <path d="M12 116 Q8 126 10 144 L18 148 Q22 132 22 118 Z" class="body-part" data-region="Braço esquerdo" onclick="selectPart(this)"/>
+                <path d="M138 70 Q146 74 148 90 L144 108 Q138 104 132 100 L130 80 Z" class="body-part" data-region="Braço direito" onclick="selectPart(this)"/>
+                <ellipse cx="144" cy="112" rx="8" ry="7" class="body-part" data-region="Braço direito" onclick="selectPart(this)" style="stroke-width:0.8;opacity:0.7"/>
+                <path d="M148 116 Q152 126 150 144 L142 148 Q138 132 138 118 Z" class="body-part" data-region="Braço direito" onclick="selectPart(this)"/>
+                <path d="M8 146 Q4 152 6 162 Q10 170 18 168 Q24 164 24 156 L20 148 Z" class="body-part" data-region="Mão esquerda" onclick="selectPart(this)"/>
+                <path d="M152 146 Q156 152 154 162 Q150 170 142 168 Q136 164 136 156 L140 148 Z" class="body-part" data-region="Mão direita" onclick="selectPart(this)"/>
+                <path d="M44 148 Q80 152 116 148 L114 168 Q80 172 46 168 Z" class="body-part" data-region="Quadril / Lombar" onclick="selectPart(this)"/>
+                <path d="M46 168 Q64 172 72 170 L70 220 Q60 222 48 216 Z" class="body-part" data-region="Perna esquerda" onclick="selectPart(this)"/>
+                <ellipse cx="59" cy="224" rx="12" ry="8" class="body-part" data-region="Perna esquerda" onclick="selectPart(this)" style="stroke-width:0.8;opacity:0.7"/>
+                <path d="M50 230 Q58 228 68 230 L66 282 Q58 286 50 282 Z" class="body-part" data-region="Perna esquerda" onclick="selectPart(this)"/>
+                <path d="M114 168 Q96 172 88 170 L90 220 Q100 222 112 216 Z" class="body-part" data-region="Perna direita" onclick="selectPart(this)"/>
+                <ellipse cx="101" cy="224" rx="12" ry="8" class="body-part" data-region="Perna direita" onclick="selectPart(this)" style="stroke-width:0.8;opacity:0.7"/>
+                <path d="M110 230 Q102 228 92 230 L94 282 Q102 286 110 282 Z" class="body-part" data-region="Perna direita" onclick="selectPart(this)"/>
+                <path d="M50 282 Q58 286 66 282 L68 294 Q60 302 48 300 Q40 296 42 288 Z" class="body-part" data-region="Pé esquerdo" onclick="selectPart(this)"/>
+                <path d="M110 282 Q102 286 94 282 L92 294 Q100 302 112 300 Q120 296 118 288 Z" class="body-part" data-region="Pé direito" onclick="selectPart(this)"/>
+                <line x1="80" y1="56" x2="80" y2="300" stroke="var(--border)" stroke-width="0.6" stroke-dasharray="3,4" pointer-events="none"/>
+              </svg>
+            </div>
+
+            <div class="region-display">
+              <div class="region-dot" id="region-dot"></div>
+              <span class="region-text" id="region-text">Nenhuma região selecionada</span>
+            </div>
+
+            <div class="region-chips" id="region-chips">
+              <span class="rchip" data-region="Cabeça" onclick="selectChip(this,'Cabeça')">Cabeça</span>
+              <span class="rchip" data-region="Pescoço" onclick="selectChip(this,'Pescoço')">Pescoço</span>
+              <span class="rchip" data-region="Tórax / Peito" onclick="selectChip(this,'Tórax / Peito')">Peito</span>
+              <span class="rchip" data-region="Abdômen" onclick="selectChip(this,'Abdômen')">Abdômen</span>
+              <span class="rchip" data-region="Quadril / Lombar" onclick="selectChip(this,'Quadril / Lombar')">Lombar</span>
+              <span class="rchip chip-side-esq" data-region="Braço esquerdo" onclick="selectChip(this,'Braço esquerdo')">Braço Esq.</span>
+              <span class="rchip chip-side-dir" data-region="Braço direito" onclick="selectChip(this,'Braço direito')">Braço Dir.</span>
+              <span class="rchip chip-side-esq" data-region="Mão esquerda" onclick="selectChip(this,'Mão esquerda')">Mão Esq.</span>
+              <span class="rchip chip-side-dir" data-region="Mão direita" onclick="selectChip(this,'Mão direita')">Mão Dir.</span>
+              <span class="rchip chip-side-esq" data-region="Perna esquerda" onclick="selectChip(this,'Perna esquerda')">Perna Esq.</span>
+              <span class="rchip chip-side-dir" data-region="Perna direita" onclick="selectChip(this,'Perna direita')">Perna Dir.</span>
+              <span class="rchip chip-side-esq" data-region="Pé esquerdo" onclick="selectChip(this,'Pé esquerdo')">Pé Esq.</span>
+              <span class="rchip chip-side-dir" data-region="Pé direito" onclick="selectChip(this,'Pé direito')">Pé Dir.</span>
+              <span class="rchip" data-region="Corpo todo" onclick="selectChip(this,'Corpo todo')">Corpo todo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna direita -->
+      <div class="right-col">
+
+        <!-- Formulário -->
+        <div class="panel form-panel">
+          <div class="panel-header">
+            <div class="panel-icon">📋</div>
+            <div>
+              <div class="panel-title">Informações do paciente</div>
+              <div class="panel-sub">Quanto mais detalhes, melhor a análise</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="form-grid">
+
+              <div class="field">
+                <label>Idade <span class="req">*</span></label>
+                <!-- PHP: value="<?= $user['idade'] ?? '' ?>" -->
+                <input type="number" name="idade" id="field-idade" placeholder="Ex: 32" min="0" max="120" required>
+              </div>
+
+              <div class="field">
+                <label>Duração do sintoma <span class="req">*</span></label>
+                <select name="tempo" required>
+                  <option value="" disabled selected>Selecione</option>
+                  <option value="menos de 1 hora">Menos de 1 hora</option>
+                  <option value="algumas horas">Algumas horas</option>
+                  <option value="1 dia">Desde ontem (1 dia)</option>
+                  <option value="2 a 3 dias">2 a 3 dias</option>
+                  <option value="mais de uma semana">Mais de 1 semana</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Febre presente?</label>
+                <div class="febre-toggle">
+                  <button type="button" class="ftoggle" id="ft-sim" onclick="setFebre('sim')">🌡️ Sim</button>
+                  <button type="button" class="ftoggle" id="ft-nao" onclick="setFebre('nao')">❄️ Não</button>
+                </div>
+              </div>
+
+              <div class="field field-full">
+                <label>Descreva os sintomas <span class="req">*</span></label>
+                <textarea name="sintoma"
+                  placeholder="Descreva com detalhes o que está sentindo. Ex: dor forte no lado esquerdo do peito que piora ao respirar fundo, suando frio e com falta de ar há 2 horas..."
+                  required></textarea>
+              </div>
+
+            </div>
+
+            <div class="form-divider"></div>
+
+            <div class="submit-row">
+              <span class="submit-note">Dados analisados com segurança via IA</span>
+              <button type="submit" class="btn-analyze" id="btn-submit">
+                <span class="btn-text">Analisar sintomas</span>
+                <span class="btn-icon">→</span>
+                <div class="spinner"></div>
+              </button>
+            </div>
+          </div>
+        
+        </div>
+        <div>
+          <span></span>
+        </div>
+        <!-- ============================================================
+          PAINEL DE RESULTADO
+          PHP: adicionar class "show" e preencher os placeholders
+          urgencia class: "red" | "yellow" | "green"
+        ============================================================ -->
+        <div class="panel result-panel" id="result-panel">
+
+          <div class="urgency-header" id="result-urgency-header">
+            <div class="urgency-badge">
+              <span class="urgency-emoji" id="result-emoji"></span>
+              <div>
+                <div class="urgency-label" id="result-titulo"></div>
+              </div>
+            </div>
+            <p class="urgency-desc" id="result-descricao"></p>
+          </div>
+
+          <div class="result-body">
+            <div class="result-block">
+              <h4>🔍 Possível causa</h4>
+              <p id="result-causa"></p>
+            </div>
+            <div class="result-block">
+              <h4>⏱️ Urgência</h4>
+              <p id="result-prazo"></p>
+            </div>
+          </div>
+
+          <div class="action-steps">
+            <h4>📌 O que fazer agora</h4>
+            <div class="steps-list" id="steps-list"></div>
+          </div>
+
+          <div class="result-footer">
+            <button type="button" class="btn-ghost" onclick="novaTriagem()">↩ Nova triagem</button>
+            <!-- PHP: se logado, exibir link para dashboard -->
+            <a href="dashboard.html" class="btn-ghost" id="btn-ver-historico" style="display:none">📂 Ver histórico</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <!-- Info cards -->
+  <div style="margin-top:20px">
+    <div class="info-row">
+      <div class="info-card">
+        <div class="info-card-icon">🤖</div>
+        <div>
+          <h5>Análise por IA</h5>
+          <p>Powered by Gemini. Avaliação baseada nos sintomas informados.</p>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">📊</div>
+        <div>
+          <h5>Histórico salvo</h5>
+          <p>Todas as triagens ficam registradas para acompanhamento.</p>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">⚡</div>
+        <div>
+          <h5>Resposta imediata</h5>
+          <p>Resultado em segundos, disponível 24 horas por dia.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="page-footer">
+  <div class="disclaimer-bar">
+    <strong>⚠️ Aviso:</strong>
+    Este sistema <strong>não substitui</strong> uma consulta médica. Em caso de emergência, ligue imediatamente.
+    <div class="disclaimer-links">
+      <a href="tel:192">🚑 SAMU 192</a>
+      <a href="tel:193">🔥 Bombeiros 193</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/triagem.js"></script>
+</body>
+</html>
